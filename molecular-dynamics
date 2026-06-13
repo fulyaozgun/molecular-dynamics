@@ -56,7 +56,6 @@ plt.xlabel("Step")
 plt.ylabel("Temperature")
 plt.title("MD Simulation")
 
-# 🔥 KRİTİK SATIR
 plt.savefig("result.png", dpi=300, bbox_inches="tight")
 
 plt.show()
