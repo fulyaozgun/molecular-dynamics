@@ -15,19 +15,20 @@ np.random.seed(10)
 r = np.random.rand(N, 2) * box
 v = np.random.randn(N, 2) * 0.2
 
-def apply_pbc(r):
+def pbc(r):
     return r % box
 
-def compute_forces(r):
+def force(r):
     F = np.zeros_like(r)
 
     for i in range(N):
         for j in range(i+1, N):
             rij = r[i] - r[j]
             rij -= box * np.round(rij / box)
-            dist = np.linalg.norm(rij) + 1e-9
 
+            dist = np.linalg.norm(rij) + 1e-9
             f = 24 * epsilon * (2*(sigma**12)/dist**13 - (sigma**6)/dist**7)
+
             Fij = f * (rij / dist)
 
             F[i] += Fij
@@ -38,13 +39,13 @@ def compute_forces(r):
 T_list = []
 
 for step in range(steps):
-    F = compute_forces(r)
+    F = force(r)
 
     v += 0.5 * F/mass * dt
     r += v * dt
-    r = apply_pbc(r)
+    r = pbc(r)
 
-    F = compute_forces(r)
+    F = force(r)
     v += 0.5 * F/mass * dt
 
     T = np.mean(np.sum(v**2, axis=1))
@@ -53,6 +54,9 @@ for step in range(steps):
 plt.plot(T_list)
 plt.xlabel("Step")
 plt.ylabel("Temperature")
-plt.title("Molecular Dynamics Simulation")
-plt.savefig("result.png")
+plt.title("MD Simulation")
+
+# 🔥 KRİTİK SATIR
+plt.savefig("result.png", dpi=300, bbox_inches="tight")
+
 plt.show()
