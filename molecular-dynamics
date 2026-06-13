@@ -1,0 +1,58 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+N = 60
+steps = 2000
+dt = 0.002
+mass = 1.0
+
+epsilon = 1.0
+sigma = 1.0
+box = 10.0
+
+np.random.seed(10)
+
+r = np.random.rand(N, 2) * box
+v = np.random.randn(N, 2) * 0.2
+
+def apply_pbc(r):
+    return r % box
+
+def compute_forces(r):
+    F = np.zeros_like(r)
+
+    for i in range(N):
+        for j in range(i+1, N):
+            rij = r[i] - r[j]
+            rij -= box * np.round(rij / box)
+            dist = np.linalg.norm(rij) + 1e-9
+
+            f = 24 * epsilon * (2*(sigma**12)/dist**13 - (sigma**6)/dist**7)
+            Fij = f * (rij / dist)
+
+            F[i] += Fij
+            F[j] -= Fij
+
+    return F
+
+T_list = []
+
+for step in range(steps):
+    F = compute_forces(r)
+
+    v += 0.5 * F/mass * dt
+    r += v * dt
+    r = apply_pbc(r)
+
+    F = compute_forces(r)
+    v += 0.5 * F/mass * dt
+
+    T = np.mean(np.sum(v**2, axis=1))
+    T_list.append(T)
+
+plt.plot(T_list)
+plt.xlabel("Step")
+plt.ylabel("Temperature")
+plt.title("Molecular Dynamics Simulation")
+plt.savefig("result.png")
+plt.show()
